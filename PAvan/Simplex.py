@@ -4,7 +4,6 @@ num_filas = numero_inec + 1
 num_colum = numero_inec + numero_varZ + 2
 matriz_1 = []
 matriz_2 = []
-matriz_vacia = []
 lista = []
 respuestas = {}
 global salidaaux
@@ -27,8 +26,9 @@ def encontrar_columpiv(matriz):
 
 def encontrar_elemento_pivote(matriz):
     global fila_pivot
+    num_menor = 1000
     for i in range(num_filas - 1):
-        if matriz[i][colum_pivote]==0:
+        if matriz[i][colum_pivote]==0 or matriz[i][num_colum - 1] / matriz[i][colum_pivote] < 0:
             continue
         else:
             if i == 0:
@@ -70,6 +70,12 @@ def imprimir_matriz(matriz):
         for j in range(num_colum):
             tot = tot + str(matriz[i][j]) + "   "
         print(tot)
+    print()
+
+def limpiar_matriz(matriznueva, matrizvacia):
+    for i in range(num_filas):
+        for j in range(num_colum):
+            matriznueva[i][j]=matrizvacia[i][j]
 
 for i in range(num_filas):
     if i < num_filas-1:
@@ -79,7 +85,7 @@ for i in range(num_filas):
 
 matriz_1= crear_matriz(matriz_1)
 matriz_2= crear_matriz(matriz_2)
-matriz_vacia= crear_matriz(matriz_vacia)
+
 
 print("PROGRAMA METODO SIMPLEX")
 for i in range(num_filas):
@@ -108,16 +114,20 @@ for i in range(num_filas):
 
 
 while salidaaux == 1:
+    imprimir_matriz(matriz_1)
     encontrar_columpiv(matriz_1)
     elemento_pivote = encontrar_elemento_pivote(matriz_1)
     fila_entrante(matriz_2, matriz_1)
     reorganizar_matriz(matriz_2)
-    salidaaux = hay_negativos(matriz_2)
-    imprimir_matriz(matriz_2)
+    salidaaux = hay_negativos(matriz_1)
+    print(str(salidaaux))
+    print(elemento_pivote)
     for i in range(num_filas):
         if i == fila_pivot:
-            respuestas["X" + str(i + 1)] = respuestas.pop("S" + str(i + 1))
-            respuestas["X" + str(i + 1)] = matriz_2[i][num_colum - 1]
+            try:
+                respuestas["X" + str(i + 1)] = respuestas.pop("S" + str(i + 1))
+            except:
+                respuestas["X" + str(i + 1)] = matriz_2[i][num_colum - 1]
         elif i == num_filas - 1:
             respuestas["Z"] = matriz_2[i][num_colum - 1]
 
@@ -125,9 +135,15 @@ while salidaaux == 1:
         for j in range(len(lista)):
             if i == lista[j]:
                 respuestas["X" + str(i + 1)] = matriz_2[i][num_colum - 1]
-    matriz_1 = matriz_2
-    matriz_2 = matriz_vacia
+
+    for i in range(num_filas):
+        for j in range(num_colum):
+            matriz_1[i][j]=matriz_2[i][j]
+    for i in range(num_filas):
+        for j in range(num_colum):
+            matriz_2[i][j]= None
 
 print("Respuestas: ")
 for key, value in respuestas.items():
     print(key + " = ", value)
+
